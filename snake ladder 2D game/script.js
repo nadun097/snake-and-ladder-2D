@@ -80,10 +80,10 @@ playerDetailsForm.addEventListener("submit", function (event) {
   let players = [];
   const playerColors = ["red", "green", "yellow", "purple"];
   const playerImages = [
-    "https://www.angrybirds.com/wp-content/uploads/2022/05/optimized-ABCOM_202203_CharacterDimensio_Bomb_Movie-300x300.png",
-    "https://www.angrybirds.com/wp-content/uploads/2022/05/ABCOM_202203_350x350_CharacterDimensio_Courtney_Movie-300x300.png",
-    "https://www.angrybirds.com/wp-content/uploads/2022/05/optimized-ABCOM_202203_1000x1000_CharacterDimensio_Red_Movie-300x300.png",
-    "https://www.angrybirds.com/wp-content/uploads/2022/05/ABCOM_202203_1000x1000_CharacterDimensio_Stella_Movie-1-300x300.png",
+  "./images/player 1.png",
+   "./images/player 2.png",
+   "./images/player 3.png",
+   "./images/player 4.png",
   ];
 
   if (game.mode != 1) {
