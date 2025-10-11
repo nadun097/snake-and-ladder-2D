@@ -178,6 +178,7 @@ export class Game {
     player.moveHistory.addMove(moveData);
 
     this.updateDiceHistoryUI();
+    this.updateGridLeaderboard();
     // A new move is made, so disable redo and enable undo if possible
     document.querySelector(".redo-btn").disabled = true;
     document.querySelector(".undo-btn").disabled = player.moveHistory.historyStack.length === 0 || player.moveHistory.undoCount >= 3;
@@ -228,6 +229,8 @@ export class Game {
     if (this.level === "E") {
       if (newPosition === 100 || newPosition > 100) {
         player.position = 100;
+        player.wins++;
+        this.updateLeaderboard();
         
         const winPopup = document.querySelector(".win-popup");
         const winMessage = document.querySelector(".win-message");
@@ -242,6 +245,8 @@ export class Game {
     } else if (this.level === "M") {
       if (newPosition === 100) {
         player.position = 100;
+        player.wins++;
+        this.updateLeaderboard();
 
         const winPopup = document.querySelector(".win-popup");
         const winMessage = document.querySelector(".win-message");
@@ -257,6 +262,8 @@ export class Game {
     } else {
       if (newPosition === 100) {
         player.position = 100;
+        player.wins++;
+        this.updateLeaderboard();
 
         const winPopup = document.querySelector(".win-popup");
         const winMessage = document.querySelector(".win-message");
@@ -417,6 +424,7 @@ export class Game {
   restartGame() {
     this.resetPlayers();
     this.updateDiceHistoryUI();
+    this.updateGridLeaderboard();
 
     const playersInGame = document.querySelectorAll(".player-in-game");
     playersInGame.forEach((card) => card.classList.remove("current"));
@@ -429,9 +437,58 @@ export class Game {
     document.querySelector(".redo-btn").disabled = true;
   }
 
+  updateLeaderboard() {
+    const leaderboardList = document.querySelector(".leaderboard-list");
+    leaderboardList.innerHTML = ""; // Clear existing list
+
+    // Sort players by wins in descending order
+    const sortedPlayers = [...this.players].sort((a, b) => b.wins - a.wins);
+
+    sortedPlayers.forEach(player => {
+      const listItem = document.createElement("li");
+      listItem.innerHTML = `
+        <span class="leaderboard-name">${player.name}</span>
+        <span class="leaderboard-wins">${player.wins}</span>
+      `;
+      leaderboardList.appendChild(listItem);
+    });
+  }
+
+  updateGridLeaderboard() {
+    const gridRankingList = document.querySelector(".grid-ranking-list");
+    gridRankingList.innerHTML = "";
+
+    // --- Stack-based sorting algorithm (Insertion Sort) ---
+    const mainStack = [...this.players];
+    const sortedStack = [];
+
+    while (mainStack.length > 0) {
+      const tempPlayer = mainStack.pop();
+
+      // Move players from sortedStack back to mainStack if they have a lower position
+      while (sortedStack.length > 0 && sortedStack[sortedStack.length - 1].position > tempPlayer.position) {
+        mainStack.push(sortedStack.pop());
+      }
+      sortedStack.push(tempPlayer);
+    }
+    // The sortedStack now holds players sorted by position in descending order.
+    // We will display them by popping from the stack.
+
+    while (sortedStack.length > 0) {
+      const player = sortedStack.pop();
+      const listItem = document.createElement("li");
+      listItem.innerHTML = `
+        <span class="leaderboard-name">${player.name}</span>
+        <span class="leaderboard-wins">Pos: ${player.position}</span>
+      `;
+      gridRankingList.appendChild(listItem);
+    }
+  }
+
   existGame() {
     document.querySelector(".in-game-container").style.display = "none";
     document.querySelector(".game_fisrt_interface").style.display = "block";
     document.querySelector(".close-restart-btns").style.display = "none";
+    document.querySelector(".leaderboards-wrapper").style.display = "none";
   }
 }

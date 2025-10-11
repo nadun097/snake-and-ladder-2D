@@ -59,6 +59,7 @@ export class Player {
     this.image = image;
     this.id = id;
     this.moveHistory = new MoveHistory(7);
+    this.wins = 0;
   }
 }
 
@@ -74,28 +75,26 @@ class SnakesladdersLink {
   }
 }
 
-//class board
+
 
 export class Board {
   constructor() {
     this.first = null;
     this.last = null;
     this.snakesarray = [
-      [30, 7],
-      [47, 15],
-      [56, 19],
-      [73, 51],
-      [82, 42],
-      [92, 75],
-      [98, 55],
+      [20, 6],
+      [39, 3],
+      [77, 37],
+      [89, 32],
+      [95, 55],
     ];
     this.laddersArray = [
       [4, 25],
-      [21, 39],
-      [29, 74],
-      [43, 76],
-      [63, 80],
-      [71, 89],
+      [13, 46],
+      [50, 69],
+      [42, 63],
+      [62, 81],
+      [74, 92],
     ];
     this.players = [];
   }
@@ -117,14 +116,14 @@ export class Board {
   //displaySquare
 
   handleInsertSquare(index) {
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < this.snakesarray.length; i++) {
       if (index == this.snakesarray[i][0]) {
         this.insertSquare(index, this.snakesarray[i][1]);
         return;
       }
     }
 
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < this.laddersArray.length; i++) {
       if (index == this.laddersArray[i][0]) {
         this.insertSquare(index, this.laddersArray[i][1]);
         return;

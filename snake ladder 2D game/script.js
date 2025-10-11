@@ -137,6 +137,9 @@ selectLevelForm.addEventListener("submit", function (event) {
   image.style.display = "none";
   const resetCloseBtns = document.querySelector(".close-restart-btns");
   resetCloseBtns.style.display = "flex";
+  document.querySelector(".leaderboards-wrapper").style.display = "flex";
+  game.updateLeaderboard();
+  game.updateGridLeaderboard();
   game.createGameBoard();
 
   const playersDiv = document.querySelector(
