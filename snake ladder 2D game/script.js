@@ -15,6 +15,8 @@ const image = document.querySelector(".attachment_image_ani");
 const thrree_circle = document.querySelector(".circle_for_select_options");
 const restartBtn = document.querySelector(".restart-btn");
 const colseBtn = document.querySelector(".home-btn");
+const undoBtn = document.querySelector(".undo-btn");
+const redoBtn = document.querySelector(".redo-btn");
 const ciclefooter = document.querySelectorAll(".circle_footer");
 
 let game;
@@ -91,7 +93,7 @@ playerDetailsForm.addEventListener("submit", function (event) {
       const name = formData.get(`player${i}`);
       if (name) {
         players.push(
-          new Player(name, playerColors[i - 1], playerImages[i - 1])
+          new Player(name, playerColors[i - 1], playerImages[i - 1], i)
         );
       } else {
         return;
@@ -100,8 +102,8 @@ playerDetailsForm.addEventListener("submit", function (event) {
   } else {
     const name = formData.get("player1");
     if (name) {
-      players.push(new Player(name, playerColors[0], playerImages[0]));
-      players.push(new Player("computer", playerColors[1], playerImages[1]));
+      players.push(new Player(name, playerColors[0], playerImages[0], 1));
+      players.push(new Player("computer", playerColors[1], playerImages[1], 2));
     } else {
       return;
     }
@@ -154,9 +156,14 @@ selectLevelForm.addEventListener("submit", function (event) {
     playerImage.classList.add("playerImage");
     playerDiv.appendChild(playerImage);
 
+    const playerInfoDiv = document.createElement("div");
+    playerInfoDiv.classList.add("player-info");
+
     const playerNameEl = document.createElement("p");
     playerNameEl.textContent = game.players[i].name;
-    playerDiv.appendChild(playerNameEl);
+    playerInfoDiv.appendChild(playerNameEl);
+
+    playerDiv.appendChild(playerInfoDiv);
 
     playersDiv.appendChild(playerDiv);
 
@@ -175,4 +182,12 @@ restartBtn.addEventListener("click", () => {
 
 colseBtn.addEventListener("click", () => {
   game.existGame();
+});
+
+undoBtn.addEventListener("click", () => {
+  game.undoMove();
+});
+
+redoBtn.addEventListener("click", () => {
+  game.redoMove();
 });

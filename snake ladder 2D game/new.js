@@ -1,4 +1,53 @@
+// Stack-based Move History for Undo/Redo
+class MoveHistory {
+  constructor(maxSize = 7) {
+    this.historyStack = [];
+    this.redoStack = [];
+    this.maxSize = maxSize;
+    this.undoCount = 0;
+    this.redoCount = 0;
+  }
 
+  addMove(move) {
+    this.historyStack.push(move);
+    if (this.historyStack.length > this.maxSize) {
+      this.historyStack.shift(); // Keep only the last 7 moves
+    }
+    this.redoStack = []; // Clear redo stack on a new move
+  }
+
+  undo() {
+    if (this.historyStack.length > 0 && this.undoCount < 3) {
+      const lastMove = this.historyStack.pop();
+      this.redoStack.push(lastMove);
+      this.undoCount++;
+      return lastMove;
+    }
+    return null;
+  }
+
+  redo() {
+    if (this.redoStack.length > 0 && this.redoCount < 3) {
+      const lastUndoneMove = this.redoStack.pop();
+      this.historyStack.push(lastUndoneMove);
+      this.redoCount++;
+      return lastUndoneMove;
+    }
+    return null;
+  }
+
+  getHistory() {
+    // Return a reversed copy to show newest first
+    return [...this.historyStack].map(move => move.roll).reverse();
+  }
+
+  reset() {
+    this.historyStack = [];
+    this.redoStack = [];
+    this.undoCount = 0;
+    this.redoCount = 0;
+  }
+}
 
 //player class
 export class Player {
@@ -9,6 +58,7 @@ export class Player {
     this.color = color;
     this.image = image;
     this.id = id;
+    this.moveHistory = new MoveHistory(7);
   }
 }
 

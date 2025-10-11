@@ -89,17 +89,12 @@ export class Game {
 
   generateBoardSquaresPattern() {
     const ids = [];
-    let start = 100;
-    let end = 1;
 
-    for (let row = 0; row < 10; row++) {
+    for (let row = 9; row >= 0; row--) {
       const rowIds = [];
+      const startOfRow = row * 10 + 1;
       for (let col = 0; col < 10; col++) {
-        if (row % 2 === 0) {
-          rowIds.push(start--);
-        } else {
-          rowIds.push(start--);
-        }
+        rowIds.push(startOfRow + col);
       }
       if (row % 2 !== 0) {
         rowIds.reverse();
@@ -122,9 +117,13 @@ export class Game {
 
   handlePlayerMove() {
     const player = this.players[this.currentPlayerNumber - 1];
+    const oldPosition = player.position;
 
     const randNum = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
     player.rolledNumber = randNum;
+
+    // This will be updated after the move is complete
+    let moveData = { roll: randNum, from: oldPosition, to: 0 };
 
     const diceImg = document.querySelector(".dice-img");
     diceImg.src = diceData[randNum];
@@ -156,9 +155,8 @@ export class Game {
         );
         playerDisc.classList.add("active");
 
-        setTimeout(() => {
-          this.resetPlayers();
-        }, 1000);
+        // Wait for the win animation to finish before resetting
+        setTimeout(() => this.restartGame(), 5000);
         return;
       }
 
@@ -174,6 +172,15 @@ export class Game {
       );
       playerDisc.classList.add("active");
     }
+
+    // Finalize and add the move to history
+    moveData.to = player.position;
+    player.moveHistory.addMove(moveData);
+
+    this.updateDiceHistoryUI();
+    // A new move is made, so disable redo and enable undo if possible
+    document.querySelector(".redo-btn").disabled = true;
+    document.querySelector(".undo-btn").disabled = player.moveHistory.historyStack.length === 0 || player.moveHistory.undoCount >= 3;
 
     if (player.rolledNumber != 6) {
       if (this.mode != 1) {
@@ -197,6 +204,10 @@ export class Game {
         currentPlayer.classList.remove("current");
       });
       playersInGame[this.currentPlayerNumber - 1].classList.add("current");
+      const nextPlayer = this.players[this.currentPlayerNumber - 1];
+      const undoBtn = document.querySelector(".undo-btn");
+      undoBtn.disabled = nextPlayer.moveHistory.historyStack.length === 0 || nextPlayer.moveHistory.undoCount >= 3;
+      document.querySelector(".redo-btn").disabled = nextPlayer.moveHistory.redoStack.length === 0 || nextPlayer.moveHistory.redoCount >= 3;
     }
 
     ///compters tern
@@ -217,14 +228,12 @@ export class Game {
     if (this.level === "E") {
       if (newPosition === 100 || newPosition > 100) {
         player.position = 100;
-        // alert(`${player.name} won the game!!`);
-
-        const PlayerNamewon = document.querySelector(".current-player-name");
-        PlayerNamewon.textContent = `${
-          this.players[this.currentPlayerNumber - 1].name
-        } WON`;
-
-        // this.resetPlayers();
+        
+        const winPopup = document.querySelector(".win-popup");
+        const winMessage = document.querySelector(".win-message");
+        winMessage.textContent = `WIN - ${player.name}`;
+        winPopup.classList.add("show");
+        setTimeout(() => winPopup.classList.remove("show"), 5000);
         return true;
       } else {
         player.position = newPosition;
@@ -233,8 +242,13 @@ export class Game {
     } else if (this.level === "M") {
       if (newPosition === 100) {
         player.position = 100;
-        alert(`${player.name} won the game!!`);
-        // this.resetPlayers();
+
+        const winPopup = document.querySelector(".win-popup");
+        const winMessage = document.querySelector(".win-message");
+        winMessage.textContent = `WIN - ${player.name}`;
+        winPopup.classList.add("show");
+        setTimeout(() => winPopup.classList.remove("show"), 5000);
+
         return true;
       } else if (newPosition < 100) {
         player.position = newPosition;
@@ -243,8 +257,13 @@ export class Game {
     } else {
       if (newPosition === 100) {
         player.position = 100;
-        alert(`${player.name} won the game!!`);
-        // this.resetPlayers();
+
+        const winPopup = document.querySelector(".win-popup");
+        const winMessage = document.querySelector(".win-message");
+        winMessage.textContent = `WIN - ${player.name}`;
+        winPopup.classList.add("show");
+        setTimeout(() => winPopup.classList.remove("show"), 5000);
+
         return true;
       } else if (newPosition > 100) {
         const owerflow = newPosition - 100;
@@ -288,6 +307,7 @@ export class Game {
     this.players.forEach((player) => {
       player.position = 0;
       player.rolledNumber = 0;
+      player.moveHistory.reset();
     });
     this.currentPlayerNumber = 1;
     // const currentPlayerNameEl = document.querySelector(".current-player-name");
@@ -306,8 +326,107 @@ export class Game {
     });
   }
 
+  updateDiceHistoryUI() {
+    const playersInGame = document.querySelectorAll(".player-in-game");
+    this.players.forEach((player, index) => {
+      const playerCard = playersInGame[index];
+      const playerInfo = playerCard.querySelector(".player-info");
+      let historyContainer = playerInfo.querySelector(".dice-history");
+      if (!historyContainer) {
+        historyContainer = document.createElement("div");
+        historyContainer.className = "dice-history";
+        playerInfo.appendChild(historyContainer);
+      }
+
+      historyContainer.innerHTML = ""; // Clear previous history
+      const history = player.moveHistory.getHistory();
+
+      history.forEach((roll) => {
+        const rollDiv = document.createElement("div");
+        rollDiv.className = "dice-roll-history-item";
+        rollDiv.textContent = roll;
+        historyContainer.appendChild(rollDiv);
+      });
+    });
+  }
+
+  undoMove() {
+    const player = this.players[this.currentPlayerNumber - 1];
+    const lastMove = player.moveHistory.undo();
+    const undoBtn = document.querySelector(".undo-btn");
+    const redoBtn = document.querySelector(".redo-btn");
+
+    if (lastMove) {
+      // Remove player from new position
+      this.board.deleteNodePlayer(player.position, this.currentPlayerNumber);
+      const oldSquare = document.getElementById(`${player.position}`);
+      if (oldSquare) {
+        oldSquare
+          .querySelector(`.playerDisc${this.currentPlayerNumber}`)
+          .classList.remove("active");
+      }
+
+      // Restore old position
+      player.position = lastMove.from;
+      this.board.addPlayers(player, this.currentPlayerNumber);
+      if (player.position > 0) {
+        const newSquare = document.getElementById(`${player.position}`);
+        newSquare
+          .querySelector(`.playerDisc${this.currentPlayerNumber}`)
+          .classList.add("active");
+      }
+      this.updateDiceHistoryUI();
+
+      // Update button states
+      redoBtn.disabled = false;
+      if (player.moveHistory.historyStack.length === 0 || player.moveHistory.undoCount >= 3) {
+        undoBtn.disabled = true;
+      }
+    }
+  }
+
+  redoMove() {
+    const player = this.players[this.currentPlayerNumber - 1];
+    const undoneMove = player.moveHistory.redo();
+    const redoBtn = document.querySelector(".redo-btn");
+
+    if (undoneMove) {
+      // Remove from old position
+      this.board.deleteNodePlayer(player.position, this.currentPlayerNumber);
+      if (player.position > 0) {
+        document
+          .getElementById(`${player.position}`)
+          .querySelector(`.playerDisc${this.currentPlayerNumber}`)
+          .classList.remove("active");
+      }
+
+      // Re-apply the move
+      player.position = undoneMove.to;
+      this.board.addPlayers(player, this.currentPlayerNumber);
+      document.getElementById(`${player.position}`).querySelector(`.playerDisc${this.currentPlayerNumber}`).classList.add("active");
+      this.updateDiceHistoryUI();
+
+      // Update button states
+      document.querySelector(".undo-btn").disabled = false;
+      if (player.moveHistory.redoStack.length === 0 || player.moveHistory.redoCount >= 3) {
+        redoBtn.disabled = true;
+      }
+    }
+  }
+
   restartGame() {
     this.resetPlayers();
+    this.updateDiceHistoryUI();
+
+    const playersInGame = document.querySelectorAll(".player-in-game");
+    playersInGame.forEach((card) => card.classList.remove("current"));
+    if (playersInGame.length > 0) {
+      playersInGame[0].classList.add("current");
+    }
+
+    const undoBtn = document.querySelector(".undo-btn");
+    undoBtn.disabled = true;
+    document.querySelector(".redo-btn").disabled = true;
   }
 
   existGame() {

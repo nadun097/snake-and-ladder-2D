@@ -672,6 +672,40 @@ background-color: rgba(0, 0, 0, 0);
   
 }
 
+.action-buttons {
+  display: flex;
+  gap: 20px;
+  margin-top: -20px;
+}
+
+.undo-btn,
+.redo-btn {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 60px;
+  height: 60px;
+  transition: transform 0.2s ease;
+}
+
+.undo-btn:hover,
+.redo-btn:hover {
+  transform: scale(1.1);
+}
+
+.undo-btn img,
+.redo-btn img {
+  width: 100%;
+  height: 100%;
+}
+.undo-btn:disabled,
+.redo-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: scale(1);
+}
+
 .board .square {
   position: relative;
 /* border: 1px solid rgb(255, 0, 0); */
@@ -844,6 +878,7 @@ background-color: rgba(0, 0, 0, 0);
   inset 0 0 10px rgba(44, 43, 43, 0.2); */
   box-shadow: 0 4px 10px -4px rgba(0, 0, 0, 0.4);
   border-radius: 10px;
+  border-radius: 15px;
 }
 
 .player-in-game.current {
@@ -873,26 +908,32 @@ background-color: rgba(0, 0, 0, 0);
   text-transform: uppercase;
 }
 
-.dice-history {
-  position: absolute;
-  bottom: 5px;
-  left: 80px;
-  display: flex;
-  gap: 4px;
-}
-
 .dice-roll-history-item {
-  width: 20px;
-  height: 20px;
+  width: 25px;
+  height: 25px;
   background-color: rgba(0, 0, 0, 0.3);
   color: white;
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 20px;
   font-weight: bold;
   box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.5);
+}
+
+.dice-history {
+  display: flex;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.player-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 5px;
 }
 
 @keyframes glow-and-move {
@@ -904,5 +945,51 @@ background-color: rgba(0, 0, 0, 0);
   50% {
     transform: translateY(-10px);
     filter: drop-shadow(0 0 15px rgba(73, 255, 88, 1));
+  }
+}
+
+.win-popup {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 40px 60px;
+  border-radius: 20px;
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+  border: 3px solid #ffd700;
+  z-index: 100;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  animation: fadeInOut 5s ease-in-out forwards;
+}
+
+.win-popup.show {
+  display: flex;
+}
+
+.win-message {
+  font-family: "Bowlby One SC", sans-serif;
+  font-size: 48px;
+  color: #ffd700;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+}
+
+.win-image {
+  width: 150px;
+  height: auto;
+}
+
+@keyframes fadeInOut {
+  0%, 100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  10%, 90% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
   }
 }
