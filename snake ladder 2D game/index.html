@@ -24,7 +24,7 @@
       <div class="in-game-container">
         <div class="player-container">
           <div class="players-in-game">
-            <!--  -->
+          
           </div>
           <h2 class="current-player-name"></h2>
           <img src="./images/map.png" class="map" />
@@ -90,9 +90,11 @@
          
 
       <div class="game_selectmode_interface">
-       
-
-         <h2>GAME MODE</h2>
+        <img
+          src="./images/b map.png"
+          class="interfaceback_image"
+        />
+        <h2>GAME MODE</h2>
 
         <form class="select-mode-form">
           <input type="radio" id="mode1" name="mode" value="1" checked />
@@ -128,13 +130,22 @@
                 <i class="fa-solid fa-user"></i>
                 <i class="fa-solid fa-user"></i>
               </div>
+              
             </label>
+            
           </div>
 
-          <button class="next_container">
-            <p>NEXT</p>
-            <i class="fa-solid fa-angle-right"></i>
-          </button>
+          <div class="navigation-buttons">
+            <button type="button" class="back_container back-to-home">
+              <i class="fa-solid fa-angle-left"></i>
+              <p>BACK</p>
+            </button>
+            <button class="next_container">
+              <p>NEXT</p>
+              <i class="fa-solid fa-angle-right"></i>
+            </button>
+          </div>
+        
         </form>
       </div>
 
@@ -156,7 +167,7 @@
       <!-- user details form -->
       <div class="game_username_interface">
         <img
-          src="./images/game-gui_172107-1619.avif"
+          src="./images/b map.png"
           class="interfaceback_image"
         />
         <h2>PLAYER NAME</h2>
@@ -228,10 +239,16 @@
             </div>
           </div>
 
-          <button class="next_container">
-            <p>NEXT</p>
-            <i class="fa-solid fa-angle-right"></i>
-          </button>
+          <div class="navigation-buttons">
+            <button type="button" class="back_container back-to-mode">
+              <i class="fa-solid fa-angle-left"></i>
+              <p>BACK</p>
+            </button>
+            <button class="next_container">
+              <p>NEXT</p>
+              <i class="fa-solid fa-angle-right"></i>
+            </button>
+          </div>
         </form>
       </div>
       <!--user details form end  -->
@@ -239,7 +256,7 @@
       <!-- level  -->
       <div class="game_userlevel_select_interface">
         <img
-          src="./images/game-gui_172107-1619.avif"
+          src="./images/b map.png"
           class="interfaceback_image"
         />
         <h2>SELECT LEVEL</h2>
@@ -264,10 +281,16 @@
             <h3>HARD</h3>
           </div>
 
-          <button class="next_container">
-            <p>NEXT</p>
-            <i class="fa-solid fa-angle-right"></i>
-          </button>
+          <div class="navigation-buttons">
+            <button type="button" class="back_container back-to-player-details">
+              <i class="fa-solid fa-angle-left"></i>
+              <p>BACK</p>
+            </button>
+            <button class="next_container">
+              <p>NEXT</p>
+              <i class="fa-solid fa-angle-right"></i>
+            </button>
+          </div>
         </form>
       </div>
 

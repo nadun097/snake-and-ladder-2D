@@ -21,6 +21,11 @@ const undoBtn = document.querySelector(".undo-btn");
 const redoBtn = document.querySelector(".redo-btn");
 const ciclefooter = document.querySelectorAll(".circle_footer");
 
+const backToHomeBtn = document.querySelector(".back-to-home");
+const backToModeBtn = document.querySelector(".back-to-mode");
+const backToPlayerDetailsBtn = document.querySelector(
+  ".back-to-player-details"
+);
 let game;
 let board;
 
@@ -190,4 +195,32 @@ undoBtn.addEventListener("click", () => {
 
 redoBtn.addEventListener("click", () => {
   game.redoMove();
+});
+
+backToHomeBtn.addEventListener("click", () => {
+  selectModePanel.style.display = "none";
+  document.querySelector(".game_fisrt_interface").style.display = "block";
+  thrree_circle.style.display = "none";
+  image.style.display = "none";
+  ciclefooter.forEach((footer) => {
+    footer.classList.remove("active");
+  });
+});
+
+backToModeBtn.addEventListener("click", () => {
+  playerDetailsPanel.style.display = "none";
+  selectModePanel.style.display = "block";
+
+  // Update footer indicators
+  ciclefooter[1].classList.remove("active");
+  ciclefooter[0].classList.add("active");
+});
+
+backToPlayerDetailsBtn.addEventListener("click", () => {
+  selectLevelPanel.style.display = "none";
+  playerDetailsPanel.style.display = "block";
+
+  // Update footer indicators
+  ciclefooter[2].classList.remove("active");
+  ciclefooter[1].classList.add("active");
 });
