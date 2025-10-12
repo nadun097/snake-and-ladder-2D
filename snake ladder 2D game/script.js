@@ -98,7 +98,9 @@ playerDetailsForm.addEventListener("submit", function (event) {
     const name = formData.get("player1");
     if (name) {
       players.push(new Player(name, gameConfig.playerColors[0], gameConfig.playerImages[0], 1));
-      players.push(new Player("computer", gameConfig.playerColors[1], gameConfig.playerImages[1], 2));
+      const computerPlayer = new Player("Computer", gameConfig.playerColors[1], gameConfig.playerImages[1], 2);
+      computerPlayer.isComputer = true; // Flag to identify computer player
+      players.push(computerPlayer);
     } else {
       return;
     }

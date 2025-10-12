@@ -25,6 +25,7 @@ export class Player {
     this.image = image;
     this.id = id;
     this.wins = 0;
+    this.isComputer = false; // Default to human player
     
     // Move history using Stack data structure
     this.historyStack = new Stack(7);  // Max 7 moves

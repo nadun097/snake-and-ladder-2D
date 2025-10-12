@@ -147,6 +147,7 @@ export class Game {
    */
   handlePlayerMove() {
     const player = this.players[this.currentPlayerNumber - 1];
+    const isComputerTurn = player.isComputer;
     const oldPosition = player.position;
 
     // Roll dice
@@ -239,26 +240,63 @@ export class Game {
 
       // Update undo/redo buttons for next player
       const nextPlayer = this.players[this.currentPlayerNumber - 1];
-      const undoBtn = document.querySelector(".undo-btn");
-      undoBtn.disabled = 
-        nextplayer.historyStack.length === 0 || 
-        nextplayer.undoCount >= 3;
-      document.querySelector(".redo-btn").disabled = 
-        nextplayer.redoStack.length === 0 || 
-        nextplayer.redoCount >= 3;
+      document.querySelector(".undo-btn").disabled = !nextPlayer.canUndo();
+      document.querySelector(".redo-btn").disabled = !nextPlayer.canRedo();
     }
 
-    // Computer's turn (single player mode)
-    if (this.players[this.currentPlayerNumber - 1].name === "computer") {
-      const diceRollBtn = document.querySelector(".dice-roll-btn");
-      diceRollBtn.disabled = true;
-      diceRollBtn.classList.add("disable");
-      setTimeout(() => {
-        this.handlePlayerMove();
-        diceRollBtn.disabled = false;
-        diceRollBtn.classList.remove("disable");
-      }, 800);
+    // After a human move, check if the next player is the computer
+    if (!isComputerTurn) {
+      this.checkAndTriggerComputerTurn();
     }
+  }
+
+  /**
+   * Handle the computer's turn automatically
+   */
+  handleComputerTurn() {
+    const diceRollBtn = document.querySelector(".dice-roll-btn");
+    diceRollBtn.disabled = true;
+    diceRollBtn.classList.add("disable");
+
+    // Disable undo/redo buttons during computer's turn
+    document.querySelector(".undo-btn").disabled = true;
+    document.querySelector(".redo-btn").disabled = true;
+
+    // Show computer is thinking
+    const currentPlayerNameEl = document.querySelector(".current-player-name");
+    currentPlayerNameEl.textContent = "Computer is thinking...";
+ 
+    setTimeout(() => {
+      // The computer makes its move
+      const computerPlayer = this.players[this.currentPlayerNumber - 1];
+      this.handlePlayerMove(); 
+      
+      // If the computer rolled a 6, it gets another turn.
+      // The logic in handlePlayerMove already prevents switching players on a 6.
+      // We check the original computerPlayer object for the rolled number.
+      if (computerPlayer.rolledNumber === 6) {
+        setTimeout(() => {
+          currentPlayerNameEl.textContent = "Computer got a 6! Playing again...";
+          // The current player is still the computer, so call its turn again.
+          this.handleComputerTurn();
+        }, 1500); // A longer delay to show the "playing again" message
+      }
+      // If it wasn't a 6, the turn is over. handlePlayerMove already switched the player.
+      // We just need to update the UI for the human player.
+      else {
+        setTimeout(() => {
+          const nextPlayer = this.players[this.currentPlayerNumber - 1];
+          if (!nextPlayer.isComputer) {
+            diceRollBtn.disabled = false;
+            diceRollBtn.classList.remove("disable");
+            currentPlayerNameEl.textContent = "Your turn!";
+            // Enable undo/redo for the human player
+            document.querySelector(".undo-btn").disabled = !nextPlayer.canUndo();
+            document.querySelector(".redo-btn").disabled = !nextPlayer.canRedo();
+          }
+        }, 1000);
+      }
+    }, 1200); // "Thinking" time
   }
 
   /**
@@ -335,6 +373,18 @@ export class Game {
     
     if (squareInfo.hasSnake || squareInfo.hasLadder) {
       player.position = squareInfo.endSquare;
+    }
+  }
+
+  /**
+   * Checks if the current player is the computer and triggers its turn.
+   */
+  checkAndTriggerComputerTurn() {
+    const currentPlayer = this.players[this.currentPlayerNumber - 1];
+    if (currentPlayer.isComputer) {
+      setTimeout(() => {
+        this.handleComputerTurn();
+      }, 800);
     }
   }
 
@@ -448,6 +498,9 @@ export class Game {
     if (playersInGame.length > 0) {
       playersInGame[0].classList.add("current");
     }
+
+    // Check if the first player is the computer
+    this.checkAndTriggerComputerTurn();
 
     const undoBtn = document.querySelector(".undo-btn");
     undoBtn.disabled = true;
