@@ -1,5 +1,7 @@
-import { Board, Player } from "./new.js";
-import { Game } from "./Game.js";
+import { Board } from "./src/models/Board.js";
+import { Player } from "./src/models/Player.js";
+import { Game } from "./src/Game.js";
+import { gameConfig } from "./src/config/gameConfig.js";
 
 const startButton = document.querySelector(".start-button");
 const selectModePanel = document.querySelector(".game_selectmode_interface");
@@ -80,20 +82,13 @@ playerDetailsForm.addEventListener("submit", function (event) {
 
   const formData = new FormData(playerDetailsForm);
   let players = [];
-  const playerColors = ["red", "green", "yellow", "purple"];
-  const playerImages = [
-  "./images/player 1.png",
-   "./images/player 2.png",
-   "./images/player 3.png",
-   "./images/player 4.png",
-  ];
 
   if (game.mode != 1) {
     for (let i = 1; i <= game.mode; i++) {
       const name = formData.get(`player${i}`);
       if (name) {
         players.push(
-          new Player(name, playerColors[i - 1], playerImages[i - 1], i)
+          new Player(name, gameConfig.playerColors[i - 1], gameConfig.playerImages[i - 1], i)
         );
       } else {
         return;
@@ -102,8 +97,8 @@ playerDetailsForm.addEventListener("submit", function (event) {
   } else {
     const name = formData.get("player1");
     if (name) {
-      players.push(new Player(name, playerColors[0], playerImages[0], 1));
-      players.push(new Player("computer", playerColors[1], playerImages[1], 2));
+      players.push(new Player(name, gameConfig.playerColors[0], gameConfig.playerImages[0], 1));
+      players.push(new Player("computer", gameConfig.playerColors[1], gameConfig.playerImages[1], 2));
     } else {
       return;
     }

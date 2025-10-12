@@ -1,34 +1,42 @@
-// export { Game };
-import { diceData } from "./diceData.js";
+/**
+ * Main Game Controller
+ * Manages game flow, player moves, board display, and UI updates
+ */
+import { gameConfig } from './config/gameConfig.js';
 
 export class Game {
-  players = [];
-
-  position = 0;
-  mode;
-  level;
-  answer;
-
   constructor(board) {
     this.board = board;
+    this.players = [];
     this.currentPlayerNumber = 1;
+    this.position = 0;
+    this.mode = null;
+    this.level = null;
+    this.answer = null;
     this.mainContainer = document.querySelector(".main-container");
   }
 
+  // ========== Board Management ==========
+
+  /**
+   * Create and render the visual game board
+   */
   createGameBoard() {
     const boardImg = document.querySelector(".board-img");
     const boardEl = document.querySelector(".board");
 
+    // Clear existing squares
     const squares = boardEl.querySelectorAll(".square");
-    squares.forEach((square) => {
-      square.remove();
-    });
+    squares.forEach((square) => square.remove());
 
+    // Calculate board dimensions
     const [boardWidth, boardHeight] = [
       boardImg.clientWidth,
       boardImg.clientHeight,
     ];
     const squareArea = boardHeight / 10 + boardWidth / 10;
+
+    // Set board styles
     const boardStyles = {
       width: `${boardWidth}px`,
       height: `${boardHeight}px`,
@@ -39,6 +47,7 @@ export class Game {
       boardEl.style[property] = value;
     }
 
+    // Set square styles
     const squareStyles = {
       width: `${squareArea / 2}px`,
       height: `${squareArea / 2}px`,
@@ -47,13 +56,16 @@ export class Game {
 
     const ids = this.generateBoardSquaresPattern();
 
+    // Create squares with player discs
     for (const id of ids) {
       const squareDiv = document.createElement("div");
       squareDiv.classList.add("square");
       squareDiv.id = `${id}`;
 
+      // Add player discs based on game mode
       for (let i = 1; i <= this.mode; i++) {
-        if (this.mode == 1) {
+        if (this.mode === 1) {
+          // Single player mode (player + computer)
           const playerDisc1 = document.createElement("div");
           playerDisc1.classList.add("playerDisc1");
           squareDiv.appendChild(playerDisc1);
@@ -69,6 +81,7 @@ export class Game {
         squareDiv.appendChild(playerDisc);
       }
 
+      // Apply styles
       for (const [property, value] of Object.entries(squareStyles)) {
         squareDiv.style[property] = value;
       }
@@ -77,16 +90,10 @@ export class Game {
     }
   }
 
-  hideGameBoard() {
-    document.querySelector(".board").style.display = "none";
-    document.querySelector(".dice").style.display = "none";
-  }
-
-  displayGameBoard() {
-    document.querySelector(".board").style.display = "block";
-    document.querySelector(".dice").style.display = "block";
-  }
-
+  /**
+   * Generate board square IDs in snake-and-ladder pattern
+   * @returns {Array} Array of square IDs in correct order
+   */
   generateBoardSquaresPattern() {
     const ids = [];
 
@@ -96,6 +103,7 @@ export class Game {
       for (let col = 0; col < 10; col++) {
         rowIds.push(startOfRow + col);
       }
+      // Reverse every other row for snake-and-ladder pattern
       if (row % 2 !== 0) {
         rowIds.reverse();
       }
@@ -104,37 +112,61 @@ export class Game {
     return ids;
   }
 
-  //prompt the div for selecting the level
-  selectLevel() {}
-
-  //prompt the div for selecting the mode
-  selectMode() {}
-
-  createPlayers(players) {
-    this.players = players;
-    console.log(this.players); ///////
+  /**
+   * Hide game board elements
+   */
+  hideGameBoard() {
+    document.querySelector(".board").style.display = "none";
+    document.querySelector(".dice").style.display = "none";
   }
 
+  /**
+   * Display game board elements
+   */
+  displayGameBoard() {
+    document.querySelector(".board").style.display = "block";
+    document.querySelector(".dice").style.display = "block";
+  }
+
+  // ========== Player Management ==========
+
+  /**
+   * Initialize game with players
+   * @param {Array} players - Array of Player objects
+   */
+  createPlayers(players) {
+    this.players = players;
+    console.log(this.players);
+  }
+
+  // ========== Game Logic ==========
+
+  /**
+   * Handle a player's move (dice roll and position update)
+   */
   handlePlayerMove() {
     const player = this.players[this.currentPlayerNumber - 1];
     const oldPosition = player.position;
 
-    const randNum = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
+    // Roll dice
+    const randNum = Math.floor(Math.random() * 6) + 1;
     player.rolledNumber = randNum;
 
-    // This will be updated after the move is complete
     let moveData = { roll: randNum, from: oldPosition, to: 0 };
 
+    // Update dice image
     const diceImg = document.querySelector(".dice-img");
-    diceImg.src = diceData[randNum];
+    diceImg.src = gameConfig.diceImages[randNum];
 
+    // Remove active class from all player discs
     document
       .querySelectorAll(`.playerDisc${this.currentPlayerNumber}`)
       .forEach((square) => {
         square.classList.remove("active");
       });
 
-    if (player.position == 0 && player.rolledNumber == 6) {
+    // Handle starting move (need 6 to start)
+    if (player.position === 0 && player.rolledNumber === 6) {
       player.position = 1;
       this.board.addPlayers(player, this.currentPlayerNumber);
       const square = document.getElementById("1");
@@ -142,7 +174,9 @@ export class Game {
         `.playerDisc${this.currentPlayerNumber}`
       );
       playerDisc.classList.add("active");
-    } else if (player.position != 0) {
+    } 
+    // Handle regular moves
+    else if (player.position !== 0) {
       if (this.checkWin(player)) {
         this.board.addPlayers(player, this.currentPlayerNumber);
         this.board.deleteNodePlayer(
@@ -155,7 +189,7 @@ export class Game {
         );
         playerDisc.classList.add("active");
 
-        // Wait for the win animation to finish before resetting
+        // Wait for win animation before restarting
         setTimeout(() => this.restartGame(), 5000);
         return;
       }
@@ -173,45 +207,47 @@ export class Game {
       playerDisc.classList.add("active");
     }
 
-    // Finalize and add the move to history
+    // Save move to history
     moveData.to = player.position;
     player.moveHistory.addMove(moveData);
 
     this.updateDiceHistoryUI();
     this.updateGridLeaderboard();
-    // A new move is made, so disable redo and enable undo if possible
-    document.querySelector(".redo-btn").disabled = true;
-    document.querySelector(".undo-btn").disabled = player.moveHistory.historyStack.length === 0 || player.moveHistory.undoCount >= 3;
 
-    if (player.rolledNumber != 6) {
-      if (this.mode != 1) {
+    // Update undo/redo button states
+    document.querySelector(".redo-btn").disabled = true;
+    document.querySelector(".undo-btn").disabled = 
+      player.moveHistory.historyStack.length === 0 || 
+      player.moveHistory.undoCount >= 3;
+
+    // Switch players if didn't roll a 6
+    if (player.rolledNumber !== 6) {
+      if (this.mode !== 1) {
         this.currentPlayerNumber =
-          this.currentPlayerNumber == this.mode
-            ? 1
-            : this.currentPlayerNumber + 1;
+          this.currentPlayerNumber === this.mode ? 1 : this.currentPlayerNumber + 1;
       } else {
-        this.currentPlayerNumber = this.currentPlayerNumber == 2 ? 1 : 2;
+        this.currentPlayerNumber = this.currentPlayerNumber === 2 ? 1 : 2;
       }
 
-      // const currentPlayerNameEl = document.querySelector(
-      //   ".current-player-name"
-      // );
-      // currentPlayerNameEl.textContent = `${
-      //   this.players[this.currentPlayerNumber - 1].name
-      // }'s tern: `;
-
+      // Update current player highlight
       const playersInGame = document.querySelectorAll(".player-in-game");
       playersInGame.forEach((currentPlayer) => {
         currentPlayer.classList.remove("current");
       });
       playersInGame[this.currentPlayerNumber - 1].classList.add("current");
+
+      // Update undo/redo buttons for next player
       const nextPlayer = this.players[this.currentPlayerNumber - 1];
       const undoBtn = document.querySelector(".undo-btn");
-      undoBtn.disabled = nextPlayer.moveHistory.historyStack.length === 0 || nextPlayer.moveHistory.undoCount >= 3;
-      document.querySelector(".redo-btn").disabled = nextPlayer.moveHistory.redoStack.length === 0 || nextPlayer.moveHistory.redoCount >= 3;
+      undoBtn.disabled = 
+        nextPlayer.moveHistory.historyStack.length === 0 || 
+        nextPlayer.moveHistory.undoCount >= 3;
+      document.querySelector(".redo-btn").disabled = 
+        nextPlayer.moveHistory.redoStack.length === 0 || 
+        nextPlayer.moveHistory.redoCount >= 3;
     }
 
-    ///compters tern
+    // Computer's turn (single player mode)
     if (this.players[this.currentPlayerNumber - 1].name === "computer") {
       const diceRollBtn = document.querySelector(".dice-roll-btn");
       diceRollBtn.disabled = true;
@@ -224,57 +260,50 @@ export class Game {
     }
   }
 
+  /**
+   * Check if player has won the game
+   * @param {Player} player - Player to check
+   * @returns {boolean} True if player won
+   */
   checkWin(player) {
     const newPosition = player.position + player.rolledNumber;
+
     if (this.level === "E") {
-      if (newPosition === 100 || newPosition > 100) {
+      // Easy mode: any landing on or past 100 wins
+      if (newPosition >= 100) {
         player.position = 100;
         player.wins++;
         this.updateLeaderboard();
-        
-        const winPopup = document.querySelector(".win-popup");
-        const winMessage = document.querySelector(".win-message");
-        winMessage.textContent = `WIN - ${player.name}`;
-        winPopup.classList.add("show");
-        setTimeout(() => winPopup.classList.remove("show"), 5000);
+        this.showWinMessage(player);
         return true;
       } else {
         player.position = newPosition;
         return false;
       }
     } else if (this.level === "M") {
+      // Medium mode: must land on or below 100
       if (newPosition === 100) {
         player.position = 100;
         player.wins++;
         this.updateLeaderboard();
-
-        const winPopup = document.querySelector(".win-popup");
-        const winMessage = document.querySelector(".win-message");
-        winMessage.textContent = `WIN - ${player.name}`;
-        winPopup.classList.add("show");
-        setTimeout(() => winPopup.classList.remove("show"), 5000);
-
+        this.showWinMessage(player);
         return true;
       } else if (newPosition < 100) {
         player.position = newPosition;
       }
       return false;
     } else {
+      // Hard mode: must land exactly on 100
       if (newPosition === 100) {
         player.position = 100;
         player.wins++;
         this.updateLeaderboard();
-
-        const winPopup = document.querySelector(".win-popup");
-        const winMessage = document.querySelector(".win-message");
-        winMessage.textContent = `WIN - ${player.name}`;
-        winPopup.classList.add("show");
-        setTimeout(() => winPopup.classList.remove("show"), 5000);
-
+        this.showWinMessage(player);
         return true;
       } else if (newPosition > 100) {
-        const owerflow = newPosition - 100;
-        player.position = 100 - owerflow;
+        // Bounce back
+        const overflow = newPosition - 100;
+        player.position = 100 - overflow;
         return false;
       } else {
         player.position = newPosition;
@@ -283,80 +312,55 @@ export class Game {
     }
   }
 
+  /**
+   * Display win message
+   * @param {Player} player - Winning player
+   */
+  showWinMessage(player) {
+    const winPopup = document.querySelector(".win-popup");
+    const winMessage = document.querySelector(".win-message");
+    winMessage.textContent = `WIN - ${player.name}`;
+    winPopup.classList.add("show");
+    setTimeout(() => winPopup.classList.remove("show"), 5000);
+  }
+
+  /**
+   * Check and apply snake or ladder at current position
+   * @param {Player} player - Player to check
+   */
   checkForLaddersOrSnakes(player) {
-    let currentPositionNode = this.board.findSquare(player.position);
+    const currentPositionNode = this.board.findSquare(player.position);
     let current = currentPositionNode;
 
-    if (current != null) {
+    if (current !== null) {
+      // Check for snake (going down)
       if (currentPositionNode.endSquare < currentPositionNode.square) {
         while (true) {
-          if (current.square == currentPositionNode.endSquare) {
+          if (current.square === currentPositionNode.endSquare) {
             player.position = current.square;
             return;
           }
-
           current = current.previous;
         }
-      } else if (currentPositionNode.endSquare > currentPositionNode.square) {
+      } 
+      // Check for ladder (going up)
+      else if (currentPositionNode.endSquare > currentPositionNode.square) {
         while (true) {
-          if (current.square == currentPositionNode.endSquare) {
+          if (current.square === currentPositionNode.endSquare) {
             player.position = current.square;
             return;
           }
-
           current = current.next;
         }
       }
     }
   }
 
-  resetPlayers() {
-    this.players.forEach((player) => {
-      player.position = 0;
-      player.rolledNumber = 0;
-      player.moveHistory.reset();
-    });
-    this.currentPlayerNumber = 1;
-    // const currentPlayerNameEl = document.querySelector(".current-player-name");
-    // currentPlayerNameEl.textContent = `${
-    //   this.players[this.currentPlayerNumber - 1].name
-    // }'s turn: `;
+  // ========== Undo/Redo Functionality ==========
 
-    const PlayerNamewon = document.querySelector(".current-player-name");
-    PlayerNamewon.textContent = "";
-
-    const imgDice = document.querySelector(".dice-img");
-    imgDice.src = diceData[1];
-
-    document.querySelectorAll(".square div").forEach((disk) => {
-      disk.classList.remove("active");
-    });
-  }
-
-  updateDiceHistoryUI() {
-    const playersInGame = document.querySelectorAll(".player-in-game");
-    this.players.forEach((player, index) => {
-      const playerCard = playersInGame[index];
-      const playerInfo = playerCard.querySelector(".player-info");
-      let historyContainer = playerInfo.querySelector(".dice-history");
-      if (!historyContainer) {
-        historyContainer = document.createElement("div");
-        historyContainer.className = "dice-history";
-        playerInfo.appendChild(historyContainer);
-      }
-
-      historyContainer.innerHTML = ""; // Clear previous history
-      const history = player.moveHistory.getHistory();
-
-      history.forEach((roll) => {
-        const rollDiv = document.createElement("div");
-        rollDiv.className = "dice-roll-history-item";
-        rollDiv.textContent = roll;
-        historyContainer.appendChild(rollDiv);
-      });
-    });
-  }
-
+  /**
+   * Undo the last move
+   */
   undoMove() {
     const player = this.players[this.currentPlayerNumber - 1];
     const lastMove = player.moveHistory.undo();
@@ -364,7 +368,7 @@ export class Game {
     const redoBtn = document.querySelector(".redo-btn");
 
     if (lastMove) {
-      // Remove player from new position
+      // Remove player from current position
       this.board.deleteNodePlayer(player.position, this.currentPlayerNumber);
       const oldSquare = document.getElementById(`${player.position}`);
       if (oldSquare) {
@@ -373,7 +377,7 @@ export class Game {
           .classList.remove("active");
       }
 
-      // Restore old position
+      // Restore previous position
       player.position = lastMove.from;
       this.board.addPlayers(player, this.currentPlayerNumber);
       if (player.position > 0) {
@@ -386,12 +390,16 @@ export class Game {
 
       // Update button states
       redoBtn.disabled = false;
-      if (player.moveHistory.historyStack.length === 0 || player.moveHistory.undoCount >= 3) {
+      if (player.moveHistory.historyStack.length === 0 || 
+          player.moveHistory.undoCount >= 3) {
         undoBtn.disabled = true;
       }
     }
   }
 
+  /**
+   * Redo the last undone move
+   */
   redoMove() {
     const player = this.players[this.currentPlayerNumber - 1];
     const undoneMove = player.moveHistory.redo();
@@ -410,17 +418,48 @@ export class Game {
       // Re-apply the move
       player.position = undoneMove.to;
       this.board.addPlayers(player, this.currentPlayerNumber);
-      document.getElementById(`${player.position}`).querySelector(`.playerDisc${this.currentPlayerNumber}`).classList.add("active");
+      document
+        .getElementById(`${player.position}`)
+        .querySelector(`.playerDisc${this.currentPlayerNumber}`)
+        .classList.add("active");
       this.updateDiceHistoryUI();
 
       // Update button states
       document.querySelector(".undo-btn").disabled = false;
-      if (player.moveHistory.redoStack.length === 0 || player.moveHistory.redoCount >= 3) {
+      if (player.moveHistory.redoStack.length === 0 || 
+          player.moveHistory.redoCount >= 3) {
         redoBtn.disabled = true;
       }
     }
   }
 
+  // ========== Game State Management ==========
+
+  /**
+   * Reset all players to starting position
+   */
+  resetPlayers() {
+    this.players.forEach((player) => {
+      player.position = 0;
+      player.rolledNumber = 0;
+      player.moveHistory.reset();
+    });
+    this.currentPlayerNumber = 1;
+
+    const PlayerNamewon = document.querySelector(".current-player-name");
+    PlayerNamewon.textContent = "";
+
+    const imgDice = document.querySelector(".dice-img");
+    imgDice.src = gameConfig.diceImages[1];
+
+    document.querySelectorAll(".square div").forEach((disk) => {
+      disk.classList.remove("active");
+    });
+  }
+
+  /**
+   * Restart the game
+   */
   restartGame() {
     this.resetPlayers();
     this.updateDiceHistoryUI();
@@ -437,11 +476,54 @@ export class Game {
     document.querySelector(".redo-btn").disabled = true;
   }
 
+  /**
+   * Exit to main menu
+   */
+  existGame() {
+    document.querySelector(".in-game-container").style.display = "none";
+    document.querySelector(".game_fisrt_interface").style.display = "block";
+    document.querySelector(".close-restart-btns").style.display = "none";
+    document.querySelector(".leaderboards-wrapper").style.display = "none";
+  }
+
+  // ========== UI Updates ==========
+
+  /**
+   * Update dice history display for all players
+   */
+  updateDiceHistoryUI() {
+    const playersInGame = document.querySelectorAll(".player-in-game");
+    this.players.forEach((player, index) => {
+      const playerCard = playersInGame[index];
+      const playerInfo = playerCard.querySelector(".player-info");
+      let historyContainer = playerInfo.querySelector(".dice-history");
+      
+      if (!historyContainer) {
+        historyContainer = document.createElement("div");
+        historyContainer.className = "dice-history";
+        playerInfo.appendChild(historyContainer);
+      }
+
+      historyContainer.innerHTML = "";
+      const history = player.moveHistory.getHistory();
+
+      history.forEach((roll) => {
+        const rollDiv = document.createElement("div");
+        rollDiv.className = "dice-roll-history-item";
+        rollDiv.textContent = roll;
+        historyContainer.appendChild(rollDiv);
+      });
+    });
+  }
+
+  /**
+   * Update wins leaderboard
+   */
   updateLeaderboard() {
     const leaderboardList = document.querySelector(".leaderboard-list");
-    leaderboardList.innerHTML = ""; // Clear existing list
+    leaderboardList.innerHTML = "";
 
-    // Sort players by wins in descending order
+    // Sort players by wins (descending)
     const sortedPlayers = [...this.players].sort((a, b) => b.wins - a.wins);
 
     sortedPlayers.forEach(player => {
@@ -454,26 +536,29 @@ export class Game {
     });
   }
 
+  /**
+   * Update grid position leaderboard using stack-based sorting
+   */
   updateGridLeaderboard() {
     const gridRankingList = document.querySelector(".grid-ranking-list");
     gridRankingList.innerHTML = "";
 
-    // --- Stack-based sorting algorithm (Insertion Sort) ---
+    // Stack-based sorting (Insertion Sort using stacks)
     const mainStack = [...this.players];
     const sortedStack = [];
 
     while (mainStack.length > 0) {
       const tempPlayer = mainStack.pop();
 
-      // Move players from sortedStack back to mainStack if they have a lower position
-      while (sortedStack.length > 0 && sortedStack[sortedStack.length - 1].position > tempPlayer.position) {
+      // Move players with lower positions back to mainStack
+      while (sortedStack.length > 0 && 
+             sortedStack[sortedStack.length - 1].position > tempPlayer.position) {
         mainStack.push(sortedStack.pop());
       }
       sortedStack.push(tempPlayer);
     }
-    // The sortedStack now holds players sorted by position in descending order.
-    // We will display them by popping from the stack.
 
+    // Display sorted players
     while (sortedStack.length > 0) {
       const player = sortedStack.pop();
       const listItem = document.createElement("li");
@@ -483,12 +568,5 @@ export class Game {
       `;
       gridRankingList.appendChild(listItem);
     }
-  }
-
-  existGame() {
-    document.querySelector(".in-game-container").style.display = "none";
-    document.querySelector(".game_fisrt_interface").style.display = "block";
-    document.querySelector(".close-restart-btns").style.display = "none";
-    document.querySelector(".leaderboards-wrapper").style.display = "none";
   }
 }
