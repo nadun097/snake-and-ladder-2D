@@ -716,50 +716,66 @@ background-color: rgba(0, 0, 0, 0);
 }
 
 .square .playerDisc1 {
-  width: 15px;
-  height: 15px;
+  width: 30px;
+  height: 30px;
   position: absolute;
-  top: 15px;
-  left: 8px;
-  background-color: rgb(40, 255, 2);
+  top: 12px;
+  left: 5px;
+  background-image: url('./images/playerDice2.png');
+  background-size: cover;
   border-radius: 50%;
-  box-shadow: 0 0 0px 3px rgb(26, 3, 140);
+  box-shadow: 0 0 0px 3px rgba(79, 170, 255, 0.623);
+  display: none;
+  background-color: rgb(255, 176, 57);
+  box-shadow: 0 0 0px 3px rgba(255, 176, 57, 0.692);
   display: none;
 }
 
 .square .playerDisc2 {
-  width: 15px;
-  height: 15px;
+  width: 30px;
+  height: 30px;
   position: absolute;
-  top: 15px;
-  left: 35px;
-  background-color: rgb(1, 247, 255);
+  top: 12px;
+  left: 32px;
+  background-image: url('./images/playerDice1.png');
+  background-size: cover;
   border-radius: 50%;
-  box-shadow: 0 0 0px 3px rgb(0, 3, 4);
+  box-shadow: 0 0 0px 3px rgba(0, 191, 255, 0.438);
+  display: none;
+  background-color: rgba(0, 191, 255, 0.822);
+  box-shadow: 0 0 0px 3px rgba(0, 191, 255, 0.438);
   display: none;
 }
 
 .square .playerDisc3 {
-  width: 15px;
-  height: 15px;
+  width: 30px;
+  height: 30px;
   position: absolute;
-  top: 35px;
-  left: 8px;
-  background-color: rgb(255, 86, 1);
+  top: 32px;
+  left: 5px;
+  background-image: url('./images/playerDice3.png');
+  background-size: cover;
   border-radius: 50%;
-  box-shadow: 0 0 0px 3px rgb(19, 1, 111);
+  box-shadow: 0 0 0px 3px rgba(211, 65, 255, 0.699);
+  display: none;
+  background-color: rgb(211, 65, 255, 0.699);
+  box-shadow: 0 0 0px 3px rgba(211, 65, 255, 0.699);
   display: none;
 }
 
 .square .playerDisc4 {
-  width: 15px;
-  height: 15px;
+  width: 30px;
+  height: 30px;
   position: absolute;
-  top: 35px;
-  left: 35px;
-  background-color: rgb(255, 0, 0);
+  top: 32px;
+  left: 5px;
+  background-image: url('./images/playerDice4.png');
+  background-size: cover;
   border-radius: 50%;
-  box-shadow: 0 0 0px 3px rgb(26, 3, 140);
+  box-shadow: 0 0 0px 3px rgba(65, 255, 151, 0.699);
+  display: none;
+  background-color: rgb(65, 255, 151, 0.699);
+  box-shadow: 0 0 0px 3px rgba(65, 255, 151, 0.699);
   display: none;
 }
 
