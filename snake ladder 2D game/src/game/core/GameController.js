@@ -2,7 +2,8 @@
  * Main Game Controller
  * Manages game flow, player moves, board display, and UI updates
  */
-import { gameConfig } from './config/gameConfig.js';
+import { gameConfig } from '../config/gameConfig.js';
+import { sortByProperty } from '../../data-structures/Sorting.js';
 
 export class Game {
   constructor(board) {
@@ -168,7 +169,7 @@ export class Game {
     // Handle starting move (need 6 to start)
     if (player.position === 0 && player.rolledNumber === 6) {
       player.position = 1;
-      this.board.addPlayers(player, this.currentPlayerNumber);
+      this.board.addPlayer(player, this.currentPlayerNumber);
       const square = document.getElementById("1");
       const playerDisc = square.querySelector(
         `.playerDisc${this.currentPlayerNumber}`
@@ -178,8 +179,8 @@ export class Game {
     // Handle regular moves
     else if (player.position !== 0) {
       if (this.checkWin(player)) {
-        this.board.addPlayers(player, this.currentPlayerNumber);
-        this.board.deleteNodePlayer(
+        this.board.addPlayer(player, this.currentPlayerNumber);
+        this.board.removePlayer(
           player.position - player.rolledNumber,
           this.currentPlayerNumber
         );
@@ -195,8 +196,8 @@ export class Game {
       }
 
       this.checkForLaddersOrSnakes(player);
-      this.board.addPlayers(player, this.currentPlayerNumber);
-      this.board.deleteNodePlayer(
+      this.board.addPlayer(player, this.currentPlayerNumber);
+      this.board.removePlayer(
         player.position - player.rolledNumber,
         this.currentPlayerNumber
       );
@@ -209,7 +210,7 @@ export class Game {
 
     // Save move to history
     moveData.to = player.position;
-    player.moveHistory.addMove(moveData);
+    player.addMove(moveData);
 
     this.updateDiceHistoryUI();
     this.updateGridLeaderboard();
@@ -217,8 +218,8 @@ export class Game {
     // Update undo/redo button states
     document.querySelector(".redo-btn").disabled = true;
     document.querySelector(".undo-btn").disabled = 
-      player.moveHistory.historyStack.length === 0 || 
-      player.moveHistory.undoCount >= 3;
+      player.historyStack.length === 0 || 
+      player.undoCount >= 3;
 
     // Switch players if didn't roll a 6
     if (player.rolledNumber !== 6) {
@@ -240,11 +241,11 @@ export class Game {
       const nextPlayer = this.players[this.currentPlayerNumber - 1];
       const undoBtn = document.querySelector(".undo-btn");
       undoBtn.disabled = 
-        nextPlayer.moveHistory.historyStack.length === 0 || 
-        nextPlayer.moveHistory.undoCount >= 3;
+        nextplayer.historyStack.length === 0 || 
+        nextplayer.undoCount >= 3;
       document.querySelector(".redo-btn").disabled = 
-        nextPlayer.moveHistory.redoStack.length === 0 || 
-        nextPlayer.moveHistory.redoCount >= 3;
+        nextplayer.redoStack.length === 0 || 
+        nextplayer.redoCount >= 3;
     }
 
     // Computer's turn (single player mode)
@@ -326,33 +327,14 @@ export class Game {
 
   /**
    * Check and apply snake or ladder at current position
+   * Uses: Board.checkSquare() which uses LinkedList internally
    * @param {Player} player - Player to check
    */
   checkForLaddersOrSnakes(player) {
-    const currentPositionNode = this.board.findSquare(player.position);
-    let current = currentPositionNode;
-
-    if (current !== null) {
-      // Check for snake (going down)
-      if (currentPositionNode.endSquare < currentPositionNode.square) {
-        while (true) {
-          if (current.square === currentPositionNode.endSquare) {
-            player.position = current.square;
-            return;
-          }
-          current = current.previous;
-        }
-      } 
-      // Check for ladder (going up)
-      else if (currentPositionNode.endSquare > currentPositionNode.square) {
-        while (true) {
-          if (current.square === currentPositionNode.endSquare) {
-            player.position = current.square;
-            return;
-          }
-          current = current.next;
-        }
-      }
+    const squareInfo = this.board.checkSquare(player.position);
+    
+    if (squareInfo.hasSnake || squareInfo.hasLadder) {
+      player.position = squareInfo.endSquare;
     }
   }
 
@@ -360,16 +342,17 @@ export class Game {
 
   /**
    * Undo the last move
+   * Uses: Player.undoMove() which uses Stack data structure
    */
   undoMove() {
     const player = this.players[this.currentPlayerNumber - 1];
-    const lastMove = player.moveHistory.undo();
+    const lastMove = player.undoMove();
     const undoBtn = document.querySelector(".undo-btn");
     const redoBtn = document.querySelector(".redo-btn");
 
     if (lastMove) {
       // Remove player from current position
-      this.board.deleteNodePlayer(player.position, this.currentPlayerNumber);
+      this.board.removePlayer(player.position, this.currentPlayerNumber);
       const oldSquare = document.getElementById(`${player.position}`);
       if (oldSquare) {
         oldSquare
@@ -379,7 +362,7 @@ export class Game {
 
       // Restore previous position
       player.position = lastMove.from;
-      this.board.addPlayers(player, this.currentPlayerNumber);
+      this.board.addPlayer(player, this.currentPlayerNumber);
       if (player.position > 0) {
         const newSquare = document.getElementById(`${player.position}`);
         newSquare
@@ -390,24 +373,22 @@ export class Game {
 
       // Update button states
       redoBtn.disabled = false;
-      if (player.moveHistory.historyStack.length === 0 || 
-          player.moveHistory.undoCount >= 3) {
-        undoBtn.disabled = true;
-      }
+      undoBtn.disabled = !player.canUndo();
     }
   }
 
   /**
    * Redo the last undone move
+   * Uses: Player.redoMove() which uses Stack data structure
    */
   redoMove() {
     const player = this.players[this.currentPlayerNumber - 1];
-    const undoneMove = player.moveHistory.redo();
+    const undoneMove = player.redoMove();
     const redoBtn = document.querySelector(".redo-btn");
 
     if (undoneMove) {
       // Remove from old position
-      this.board.deleteNodePlayer(player.position, this.currentPlayerNumber);
+      this.board.removePlayer(player.position, this.currentPlayerNumber);
       if (player.position > 0) {
         document
           .getElementById(`${player.position}`)
@@ -417,7 +398,7 @@ export class Game {
 
       // Re-apply the move
       player.position = undoneMove.to;
-      this.board.addPlayers(player, this.currentPlayerNumber);
+      this.board.addPlayer(player, this.currentPlayerNumber);
       document
         .getElementById(`${player.position}`)
         .querySelector(`.playerDisc${this.currentPlayerNumber}`)
@@ -426,10 +407,7 @@ export class Game {
 
       // Update button states
       document.querySelector(".undo-btn").disabled = false;
-      if (player.moveHistory.redoStack.length === 0 || 
-          player.moveHistory.redoCount >= 3) {
-        redoBtn.disabled = true;
-      }
+      redoBtn.disabled = !player.canRedo();
     }
   }
 
@@ -442,7 +420,7 @@ export class Game {
     this.players.forEach((player) => {
       player.position = 0;
       player.rolledNumber = 0;
-      player.moveHistory.reset();
+      player.resetHistory();
     });
     this.currentPlayerNumber = 1;
 
@@ -505,7 +483,7 @@ export class Game {
       }
 
       historyContainer.innerHTML = "";
-      const history = player.moveHistory.getHistory();
+      const history = player.getHistory();
 
       history.forEach((roll) => {
         const rollDiv = document.createElement("div");
@@ -539,34 +517,26 @@ export class Game {
   /**
    * Update grid position leaderboard using stack-based sorting
    */
+  /**
+   * Update grid position leaderboard using pure sorting algorithm
+   * Uses: sortByProperty() from data-structures/Sorting.js
+   */
   updateGridLeaderboard() {
     const gridRankingList = document.querySelector(".grid-ranking-list");
     gridRankingList.innerHTML = "";
 
-    // Stack-based sorting (Insertion Sort using stacks)
-    const mainStack = [...this.players];
-    const sortedStack = [];
-
-    while (mainStack.length > 0) {
-      const tempPlayer = mainStack.pop();
-
-      // Move players with lower positions back to mainStack
-      while (sortedStack.length > 0 && 
-             sortedStack[sortedStack.length - 1].position > tempPlayer.position) {
-        mainStack.push(sortedStack.pop());
-      }
-      sortedStack.push(tempPlayer);
-    }
+    // Use pure stack-based sorting algorithm
+    // Sort players by position (descending - highest position first)
+    const sortedPlayers = sortByProperty(this.players, 'position', false);
 
     // Display sorted players
-    while (sortedStack.length > 0) {
-      const player = sortedStack.pop();
+    sortedPlayers.forEach(player => {
       const listItem = document.createElement("li");
       listItem.innerHTML = `
         <span class="leaderboard-name">${player.name}</span>
         <span class="leaderboard-wins">Pos: ${player.position}</span>
       `;
       gridRankingList.appendChild(listItem);
-    }
+    });
   }
 }

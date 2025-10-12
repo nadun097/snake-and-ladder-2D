@@ -1,7 +1,7 @@
-import { Board } from "./src/models/Board.js";
-import { Player } from "./src/models/Player.js";
-import { Game } from "./src/Game.js";
-import { gameConfig } from "./src/config/gameConfig.js";
+import { Board } from "./src/game/core/Board.js";
+import { Player } from "./src/game/core/Player.js";
+import { Game } from "./src/game/core/GameController.js";
+import { gameConfig } from "./src/game/config/gameConfig.js";
 
 const startButton = document.querySelector(".start-button");
 const selectModePanel = document.querySelector(".game_selectmode_interface");
