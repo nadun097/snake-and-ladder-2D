@@ -1,5 +1,7 @@
-import { Board, Player } from "./new.js";
-import { Game } from "./Game.js";
+import { Board } from "./src/game/core/Board.js";
+import { Player } from "./src/game/core/Player.js";
+import { Game } from "./src/game/core/GameController.js";
+import { gameConfig } from "./src/game/config/gameConfig.js";
 
 const startButton = document.querySelector(".start-button");
 const selectModePanel = document.querySelector(".game_selectmode_interface");
@@ -19,6 +21,11 @@ const undoBtn = document.querySelector(".undo-btn");
 const redoBtn = document.querySelector(".redo-btn");
 const ciclefooter = document.querySelectorAll(".circle_footer");
 
+const backToHomeBtn = document.querySelector(".back-to-home");
+const backToModeBtn = document.querySelector(".back-to-mode");
+const backToPlayerDetailsBtn = document.querySelector(
+  ".back-to-player-details"
+);
 let game;
 let board;
 
@@ -80,20 +87,13 @@ playerDetailsForm.addEventListener("submit", function (event) {
 
   const formData = new FormData(playerDetailsForm);
   let players = [];
-  const playerColors = ["red", "green", "yellow", "purple"];
-  const playerImages = [
-  "./images/player 1.png",
-   "./images/player 2.png",
-   "./images/player 3.png",
-   "./images/player 4.png",
-  ];
 
   if (game.mode != 1) {
     for (let i = 1; i <= game.mode; i++) {
       const name = formData.get(`player${i}`);
       if (name) {
         players.push(
-          new Player(name, playerColors[i - 1], playerImages[i - 1], i)
+          new Player(name, gameConfig.playerColors[i - 1], gameConfig.playerImages[i - 1], i)
         );
       } else {
         return;
@@ -102,8 +102,10 @@ playerDetailsForm.addEventListener("submit", function (event) {
   } else {
     const name = formData.get("player1");
     if (name) {
-      players.push(new Player(name, playerColors[0], playerImages[0], 1));
-      players.push(new Player("computer", playerColors[1], playerImages[1], 2));
+      players.push(new Player(name, gameConfig.playerColors[0], gameConfig.playerImages[0], 1));
+      const computerPlayer = new Player("Computer", gameConfig.playerColors[1], gameConfig.playerImages[1], 2);
+      computerPlayer.isComputer = true; // Flag to identify computer player
+      players.push(computerPlayer);
     } else {
       return;
     }
@@ -193,4 +195,32 @@ undoBtn.addEventListener("click", () => {
 
 redoBtn.addEventListener("click", () => {
   game.redoMove();
+});
+
+backToHomeBtn.addEventListener("click", () => {
+  selectModePanel.style.display = "none";
+  document.querySelector(".game_fisrt_interface").style.display = "block";
+  thrree_circle.style.display = "none";
+  image.style.display = "none";
+  ciclefooter.forEach((footer) => {
+    footer.classList.remove("active");
+  });
+});
+
+backToModeBtn.addEventListener("click", () => {
+  playerDetailsPanel.style.display = "none";
+  selectModePanel.style.display = "block";
+
+  // Update footer indicators
+  ciclefooter[1].classList.remove("active");
+  ciclefooter[0].classList.add("active");
+});
+
+backToPlayerDetailsBtn.addEventListener("click", () => {
+  selectLevelPanel.style.display = "none";
+  playerDetailsPanel.style.display = "block";
+
+  // Update footer indicators
+  ciclefooter[2].classList.remove("active");
+  ciclefooter[1].classList.add("active");
 });

@@ -1,0 +1,22 @@
+{
+  "name": "snake-and-ladder-2d",
+  "version": "1.0.0",
+  "description": "A simple 2D Snake and Ladder game served as a static web app.",
+  "main": "index.html",
+  "scripts": {
+    "dev": "live-server --open=index.html --port=3000",
+    "start": "npm run dev"
+  },
+  "keywords": [
+    "snake",
+    "ladder",
+    "game",
+    "2d",
+    "html"
+  ],
+  "author": "nadun097",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}

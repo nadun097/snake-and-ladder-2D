@@ -28,7 +28,8 @@ body {
   height: auto;
 
   top: 45%;
-  left: 20%;
+  left: 18%;
+  /* bottom: 20px; */ /* This property is not needed with top and transform */
   transform: translate(-50%, -50%);
   z-index: -1;
 }
@@ -227,20 +228,25 @@ body {
   display: flex;
   gap: 10px;
   position: absolute;
-  left: 45%;
+  left: 50%;
   bottom: 20px;
+  transform: translateX(-50%);
   z-index: 24;
   display: none;
+   background-color: #ffffff2a;
+   padding: 5px;
+   border-radius: 20px;
 }
 
 .game_selectmode_interface {
   width: 590px;
-  height: 400px;
+  height: 550px;
   position: absolute;
-  margin-left: 25%;
-  margin-top: 8%;
-  box-shadow: 10px 10px 15px rgba(0, 0, 0, 0.3);
-  border: 10px solid #292828;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  
+ 
   z-index: 24;
   border-radius: 40px;
   display: none;
@@ -251,48 +257,51 @@ body {
   height: 100%;
   border-radius: 30px;
   position: absolute;
-  object-fit: cover;
-  filter: blur(5px);
+  
+ 
 }
 
 .game_selectmode_interface h2 {
   position: absolute;
   font-size: 46px;
   font-family: "Bowlby One SC", sans-serif;
-  margin-left: 120px;
-  margin-top: 25px;
-  color: #ffffff;
+  width: 100%;
+  text-align: center;
+  margin-top: 75px;
+  color: #0000008c;
   z-index: 3;
 }
 
 .game_selectmode_interface .selection_mode {
-  margin-top: 150px;
-  margin-left: 30px;
+  margin-top: 170px;
   height: 120px;
-  width: 90%;
+  width: 100%;
   /* background-color: #353434; */
   position: relative;
   display: flex;
-  gap: 40px;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 0 20px;
 }
 .players {
   width: 100px;
   height: 100px;
-  background-color: rgba(27, 118, 35, 0.618);
+  background-color: rgba(119, 85, 57, 0.205);
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 15px;
   border-radius: 50%;
-  border: 2px solid white;
+  border: 5px solid rgba(0, 0, 0, 0.26);
   z-index: 3;
   cursor: pointer;
  
 }
 
 .players.selected {
-  background-color: rgba(33, 208, 48, 0.459);
+  background-color: rgba(247, 182, 4, 0.459);
 }
 
 #four {
@@ -303,40 +312,69 @@ body {
   flex-direction: column;
 }
 .selection_mode .players i {
-  color: whitesmoke;
+  color: rgb(172, 116, 71);
   font-size: 20px;
   position: relative;
 }
 
-.game_selectmode_interface .next_container {
+.next_container {
   position: relative;
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin-left: 80%;
-  margin-top: 10%;
   cursor: pointer;
   background-color: transparent;
   border: none;
   z-index: 25;
 }
 
-.game_username_interface .next_container {
+.navigation-buttons {
+  position: absolute;
+  bottom: 110px;
+  width: 90%;
+  left: 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.back_container {
   position: relative;
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin-left: 80%;
   cursor: pointer;
   background-color: transparent;
   border: none;
+  z-index: 25;
 }
+
+.back_container P {
+  font-family: "Bowlby One SC", sans-serif;
+  font-size: x-large;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.493);
+  transition: transform 0.3s ease;
+}
+
+.back_container:hover {
+  transform: scale(1.1);
+}
+
+.back_container i {
+  font-size: x-large;
+  font-size: 35px;
+  margin-top: 3px;
+  color: rgba(0, 0, 0, 0.493);
+}
+
+
 
 .next_container P {
   font-family: "Bowlby One SC", sans-serif;
   font-size: x-large;
   font-weight: 700;
-  color: black;
+  color: rgba(0, 0, 0, 0.493);
   transition: transform 0.3s ease;
 }
 
@@ -348,6 +386,7 @@ body {
   font-size: x-large;
   font-size: 35px;
   margin-top: 3px;
+  color: rgba(0, 0, 0, 0.493);
 }
 
 input[type="radio"] {
@@ -359,13 +398,13 @@ input[type="radio"] {
   height: 25px;
   border-radius: 50%;
   border: 4px solid rgb(83, 83, 83);
-  /* background-color: #ffffff; */
+  background-color: #ffffff;
   cursor: pointer;
 }
 
 .circle_footer.active {
   border: 4px solid rgb(83, 83, 83);
-  background-color: rgb(41, 255, 29);
+ background-color: #818181;
 }
 
 input[type="text"] {
@@ -387,12 +426,12 @@ input[type="text"] {
 
 .game_username_interface {
   width: 590px;
-  height: 400px;
+  height: 550px;
   position: absolute;
-  margin-left: 25%;
-  margin-top: 8%;
-  box-shadow: 10px 10px 15px rgba(0, 0, 0, 0.3);
-  border: 10px solid #292828;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
   z-index: 24;
   border-radius: 40px;
   display: none;
@@ -404,12 +443,14 @@ input[type="text"] {
   font-family: "Bowlby One SC", sans-serif;
   margin-left: 100px;
   margin-top: 10px;
-  color: #ffffff;
+  margin-top: 60px;
+  color:  #0000008c;
   padding: 0%;
 }
 
 .user_input_name {
   margin-top: 60px;
+  margin-top: 140px;
 }
 .user1 {
   position: relative;
@@ -453,12 +494,12 @@ input[type="text"] {
 
 .game_userlevel_select_interface {
   width: 590px;
-  height: 400px;
+  height: 550px;
   position: absolute;
-  margin-left: 25%;
-  margin-top: 8%;
-  box-shadow: 10px 10px 15px rgba(0, 0, 0, 0.3);
-  border: 10px solid #292828;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
   z-index: 24;
   border-radius: 40px;
   display: none;
@@ -468,16 +509,17 @@ input[type="text"] {
   position: absolute;
   font-size: 46px;
   font-family: "Bowlby One SC", sans-serif;
-  margin-left: 100px;
-  margin-top: 10px;
-  color: #ffffff;
+  width: 100%;
+  text-align: center;
+  margin-top: 60px;
+  color: #0000008c;
   padding: 0%;
 }
 
 .LEVEL_container {
   width: 100%;
   height: 50px;
-  margin-top: 100px;
+  margin-top: 140px;
   position: relative;
   margin-left: 20px;
 }
@@ -485,7 +527,7 @@ input[type="text"] {
 .LEVEL_container2 {
   width: 100%;
   height: 50px;
-  margin-top: 40px;
+  margin-top: 20px;
   position: relative;
   margin-left: 20px;
 }
@@ -493,7 +535,7 @@ input[type="text"] {
 .LEVEL_container3 {
   width: 100%;
   height: 50px;
-  margin-top: 40px;
+  margin-top: 20px;
   position: relative;
   margin-left: 20px;
 }
@@ -502,7 +544,7 @@ input[type="text"] {
   margin-left: 150px;
   /* margin-top: 10px; */
   position: relative;
-  color: rgba(0, 0, 0, 0.871);
+  color: rgba(95, 35, 0, 0.603);
   font-family: "Bowlby One SC", sans-serif;
   font-size: 42px;
   letter-spacing: 2px;
@@ -512,7 +554,7 @@ input[type="text"] {
   margin-left: 150px;
   /* margin-top: 10px; */
   position: relative;
-  color: rgba(0, 0, 0, 0.871);
+  color: rgba(95, 35, 0, 0.603);
   font-family: "Bowlby One SC", sans-serif;
   font-size: 42px;
   letter-spacing: 2px;
@@ -522,7 +564,7 @@ input[type="text"] {
   margin-left: 150px;
   /* margin-top: 10px; */
   position: relative;
-  color: rgba(0, 0, 0, 0.871);
+  color: rgba(95, 35, 0, 0.603);
   font-family: "Bowlby One SC", sans-serif;
   font-size: 42px;
   letter-spacing: 2px;
@@ -532,7 +574,7 @@ input[type="text"] {
   width: 25px;
   height: 25px;
   border-radius: 5px;
-  border: 4px solid rgb(0, 0, 0);
+  border: 4px solid rgb(107, 35, 1);
   background-color: #344a2900;
   z-index: 36;
   margin-left: 100px;
@@ -543,29 +585,7 @@ input[type="text"] {
 
 .easy_mode_selected {
   /* background-color: rgba(27, 121, 33, 0.648); */
-  background-color: rgba(45, 255, 7, 0.667);
-}
-
-.game_userlevel_select_interface .next_container {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-left: 80%;
-  cursor: pointer;
-  background-color: transparent;
-  border: none;
-}
-
-.game_userlevel_select_interface .next_container {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-left: 80%;
-  cursor: pointer;
-  background-color: transparent;
-  border: none;
+  background-color: rgb(255, 85, 7);
 }
 
 .in-game-container {
@@ -716,50 +736,66 @@ background-color: rgba(0, 0, 0, 0);
 }
 
 .square .playerDisc1 {
-  width: 15px;
-  height: 15px;
+  width: 30px;
+  height: 30px;
   position: absolute;
-  top: 15px;
-  left: 8px;
-  background-color: rgb(40, 255, 2);
+  top: 12px;
+  left: 5px;
+  background-image: url('./images/playerDice2.png');
+  background-size: cover;
   border-radius: 50%;
-  box-shadow: 0 0 0px 3px rgb(26, 3, 140);
+  box-shadow: 0 0 0px 3px rgba(79, 170, 255, 0.623);
+  display: none;
+  background-color: rgb(255, 176, 57);
+  box-shadow: 0 0 0px 3px rgba(255, 176, 57, 0.692);
   display: none;
 }
 
 .square .playerDisc2 {
-  width: 15px;
-  height: 15px;
+  width: 30px;
+  height: 30px;
   position: absolute;
-  top: 15px;
-  left: 35px;
-  background-color: rgb(1, 247, 255);
+  top: 12px;
+  left: 32px;
+  background-image: url('./images/playerDice1.png');
+  background-size: cover;
   border-radius: 50%;
-  box-shadow: 0 0 0px 3px rgb(0, 3, 4);
+  box-shadow: 0 0 0px 3px rgba(0, 191, 255, 0.438);
+  display: none;
+  background-color: rgba(0, 191, 255, 0.822);
+  box-shadow: 0 0 0px 3px rgba(0, 191, 255, 0.438);
   display: none;
 }
 
 .square .playerDisc3 {
-  width: 15px;
-  height: 15px;
+  width: 30px;
+  height: 30px;
   position: absolute;
-  top: 35px;
-  left: 8px;
-  background-color: rgb(255, 86, 1);
+  top: 32px;
+  left: 5px;
+  background-image: url('./images/playerDice3.png');
+  background-size: cover;
   border-radius: 50%;
-  box-shadow: 0 0 0px 3px rgb(19, 1, 111);
+  box-shadow: 0 0 0px 3px rgba(211, 65, 255, 0.699);
+  display: none;
+  background-color: rgb(211, 65, 255, 0.699);
+  box-shadow: 0 0 0px 3px rgba(211, 65, 255, 0.699);
   display: none;
 }
 
 .square .playerDisc4 {
-  width: 15px;
-  height: 15px;
+  width: 30px;
+  height: 30px;
   position: absolute;
-  top: 35px;
-  left: 35px;
-  background-color: rgb(255, 0, 0);
+  top: 32px;
+  left: 5px;
+  background-image: url('./images/playerDice4.png');
+  background-size: cover;
   border-radius: 50%;
-  box-shadow: 0 0 0px 3px rgb(26, 3, 140);
+  box-shadow: 0 0 0px 3px rgba(65, 255, 151, 0.699);
+  display: none;
+  background-color: rgb(65, 255, 151, 0.699);
+  box-shadow: 0 0 0px 3px rgba(65, 255, 151, 0.699);
   display: none;
 }
 
@@ -852,16 +888,13 @@ background-color: rgba(0, 0, 0, 0);
   height: 100%;
 }
 
-/* //////////////////////////////////////////////////////////////////////////////////////////////// */
-.player-container {
-}
 
 .players-in-game {
   display: flex;
   flex-direction: column;
   gap: 10px;
   position: absolute;
-  left: 70px;
+  left: 10%;
   top: 50%;
   transform: translateY(-50%);
 }
@@ -1058,4 +1091,5 @@ background-color: rgba(0, 0, 0, 0);
   50% {
     transform: scale(1.3);
   }
+}
 }

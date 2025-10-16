@@ -122,8 +122,11 @@ export class Game {
     const randNum = Math.floor(Math.random() * (6 - 1 + 1)) + 1;
     player.rolledNumber = randNum;
 
-    // This will be updated after the move is complete
-    let moveData = { roll: randNum, from: oldPosition, to: 0 };
+    // Only record move history for human players
+    let moveData = null;
+    if (player.name !== "computer") {
+      moveData = { roll: randNum, from: oldPosition, to: 0 };
+    }
 
     const diceImg = document.querySelector(".dice-img");
     diceImg.src = diceData[randNum];
@@ -183,45 +186,93 @@ export class Game {
     document.querySelector(".redo-btn").disabled = true;
     document.querySelector(".undo-btn").disabled = player.moveHistory.historyStack.length === 0 || player.moveHistory.undoCount >= 3;
 
-    if (player.rolledNumber != 6) {
-      if (this.mode != 1) {
-        this.currentPlayerNumber =
-          this.currentPlayerNumber == this.mode
-            ? 1
-            : this.currentPlayerNumber + 1;
+    if (player.rolledNumber !== 6) {
+      this.switchPlayer();
+    }
+  }
+
+  handleComputerTurn() {
+    const diceRollBtn = document.querySelector(".dice-roll-btn");
+    diceRollBtn.disabled = true;
+    diceRollBtn.classList.add("disable");
+
+    // Disable undo/redo buttons during computer's turn
+    document.querySelector(".undo-btn").disabled = true;
+    document.querySelector(".redo-btn").disabled = true;
+
+    // Show computer is thinking
+    const PlayerNamewon = document.querySelector(".current-player-name");
+    PlayerNamewon.textContent = "Computer is thinking...";
+ 
+    setTimeout(() => {
+      this.handlePlayerMove();
+      const computer = this.players[this.currentPlayerNumber - 1];
+      
+      // Show what computer rolled
+      PlayerNamewon.textContent = `Computer rolled ${computer.rolledNumber}`;
+ 
+      // If the computer rolled a 6, schedule another turn
+      if (computer.name === "computer" && computer.rolledNumber === 6) {
+        setTimeout(() => {
+          PlayerNamewon.textContent = "Computer got a 6! Playing again...";
+          this.handleComputerTurn();
+        }, 1000);
       } else {
-        this.currentPlayerNumber = this.currentPlayerNumber == 2 ? 1 : 2;
+        // Switch to human player's turn
+        setTimeout(() => {
+          this.switchPlayer();
+          // Enable dice roll button for human player
+          if (this.players[this.currentPlayerNumber - 1].name !== "computer") {
+            diceRollBtn.disabled = false;
+            diceRollBtn.classList.remove("disable");
+            PlayerNamewon.textContent = "Your turn!";
+          }
+        }, 1000);
       }
+    }, 1200);
+  }
 
-      // const currentPlayerNameEl = document.querySelector(
-      //   ".current-player-name"
-      // );
-      // currentPlayerNameEl.textContent = `${
-      //   this.players[this.currentPlayerNumber - 1].name
-      // }'s tern: `;
-
-      const playersInGame = document.querySelectorAll(".player-in-game");
-      playersInGame.forEach((currentPlayer) => {
-        currentPlayer.classList.remove("current");
-      });
-      playersInGame[this.currentPlayerNumber - 1].classList.add("current");
-      const nextPlayer = this.players[this.currentPlayerNumber - 1];
-      const undoBtn = document.querySelector(".undo-btn");
-      undoBtn.disabled = nextPlayer.moveHistory.historyStack.length === 0 || nextPlayer.moveHistory.undoCount >= 3;
-      document.querySelector(".redo-btn").disabled = nextPlayer.moveHistory.redoStack.length === 0 || nextPlayer.moveHistory.redoCount >= 3;
+  switchPlayer() {
+    if (this.mode != 1) {
+      this.currentPlayerNumber =
+        this.currentPlayerNumber == this.mode
+          ? 1
+          : this.currentPlayerNumber + 1;
+    } else {
+      this.currentPlayerNumber = this.currentPlayerNumber == 2 ? 1 : 2;
     }
 
-    ///compters tern
-    if (this.players[this.currentPlayerNumber - 1].name === "computer") {
+    const playersInGame = document.querySelectorAll(".player-in-game");
+    playersInGame.forEach((currentPlayer) => {
+      currentPlayer.classList.remove("current");
+    });
+    playersInGame[this.currentPlayerNumber - 1].classList.add("current");
+
+    const nextPlayer = this.players[this.currentPlayerNumber - 1];
+    const undoBtn = document.querySelector(".undo-btn");
+    undoBtn.disabled = nextPlayer.moveHistory.historyStack.length === 0 || nextPlayer.moveHistory.undoCount >= 3;
+    document.querySelector(".redo-btn").disabled = nextPlayer.moveHistory.redoStack.length === 0 || nextPlayer.moveHistory.redoCount >= 3;
+
+    if (nextPlayer.name === "computer") {
+      // It's the computer's turn, disable human controls and start its move.
       const diceRollBtn = document.querySelector(".dice-roll-btn");
       diceRollBtn.disabled = true;
       diceRollBtn.classList.add("disable");
       setTimeout(() => {
-        this.handlePlayerMove();
-        diceRollBtn.disabled = false;
-        diceRollBtn.classList.remove("disable");
+        this.handleComputerTurn();
       }, 800);
     }
+  }
+
+  showWinPopup(player) {
+    const winPopup = document.querySelector(".win-popup");
+    const winMessage = document.querySelector(".win-message");
+    const winnerAvatar = winPopup.querySelector(".winner-avatar");
+
+    winnerAvatar.src = player.image;
+    winMessage.textContent = `WIN - ${player.name}`;
+    winPopup.classList.add("show");
+    setTimeout(() => winPopup.classList.remove("show"), 5000);
   }
 
   checkWin(player) {
@@ -231,12 +282,7 @@ export class Game {
         player.position = 100;
         player.wins++;
         this.updateLeaderboard();
-        
-        const winPopup = document.querySelector(".win-popup");
-        const winMessage = document.querySelector(".win-message");
-        winMessage.textContent = `WIN - ${player.name}`;
-        winPopup.classList.add("show");
-        setTimeout(() => winPopup.classList.remove("show"), 5000);
+        this.showWinPopup(player);
         return true;
       } else {
         player.position = newPosition;
@@ -247,13 +293,7 @@ export class Game {
         player.position = 100;
         player.wins++;
         this.updateLeaderboard();
-
-        const winPopup = document.querySelector(".win-popup");
-        const winMessage = document.querySelector(".win-message");
-        winMessage.textContent = `WIN - ${player.name}`;
-        winPopup.classList.add("show");
-        setTimeout(() => winPopup.classList.remove("show"), 5000);
-
+        this.showWinPopup(player);
         return true;
       } else if (newPosition < 100) {
         player.position = newPosition;
@@ -264,13 +304,7 @@ export class Game {
         player.position = 100;
         player.wins++;
         this.updateLeaderboard();
-
-        const winPopup = document.querySelector(".win-popup");
-        const winMessage = document.querySelector(".win-message");
-        winMessage.textContent = `WIN - ${player.name}`;
-        winPopup.classList.add("show");
-        setTimeout(() => winPopup.classList.remove("show"), 5000);
-
+        this.showWinPopup(player);
         return true;
       } else if (newPosition > 100) {
         const owerflow = newPosition - 100;
@@ -351,7 +385,9 @@ export class Game {
       history.forEach((roll) => {
         const rollDiv = document.createElement("div");
         rollDiv.className = "dice-roll-history-item";
-        rollDiv.textContent = roll;
+        const rollImg = document.createElement("img");
+        rollImg.src = diceData[roll];
+        rollDiv.appendChild(rollImg);
         historyContainer.appendChild(rollDiv);
       });
     });
